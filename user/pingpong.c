@@ -3,8 +3,7 @@
 #include "user/user.h"
 
 void closeall(int *p, int offset) {
-    int i;
-    for (i = offset; i < 4; ++i) {
+    for (int i = offset; i < 4; ++i) {
         close(p[i]);
     }
 }
