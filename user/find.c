@@ -5,7 +5,7 @@
 
 #define MAX_PATH_SIZE 100
 
-char *pathbase(char *path) {
+static char *pathbase(char *path) {
     char *p;
     static char buf[MAX_PATH_SIZE + 1];
 
@@ -16,7 +16,7 @@ char *pathbase(char *path) {
     return strcpy(buf, p + 1);
 }
 
-char *pathjoin(char *path, char *prefix, char *dst) {
+static char *pathjoin(char *dst, const char *path, const char *prefix) {
     int len = strlen(prefix);
 
     strcpy(dst, prefix);
@@ -44,22 +44,19 @@ int find(char *path, char *fname) {
             printf("%s\n", path);
         }
         break;
-
     case T_DIR:
         if (strlen(path) + 1 + DIRSIZ + 1 > MAX_PATH_SIZE) {
             fprintf(2, "find: path %s is too long\n", path);
             break;
         }
-
         struct dirent de;
         while (read(fd, &de, sizeof(de)) == sizeof(de)) {
             if (de.inum == 0 || strcmp(de.name, ".") == 0 ||
                 strcmp(de.name, "..") == 0) {
                 continue;
             }
-
             char buf[MAX_PATH_SIZE + 1];
-            char *p = pathjoin(de.name, path, buf);
+            char *p = pathjoin(buf, de.name, path);
             if (stat(p, &st) < 0) {
                 fprintf(2, "find: cannot stat path with dirent name %s\n", p);
                 continue;
