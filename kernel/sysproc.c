@@ -84,3 +84,11 @@ uint64 sys_trace(void) {
   myproc()->mask = mask;
   return 0;
 }
+
+uint64 sys_sysinfo(void) {
+  uint64 sinfo; // user pointer to struct sysinfo
+
+  if (argaddr(0, &sinfo) < 0)
+    return -1;
+  return getsysinfo(sinfo);
+}

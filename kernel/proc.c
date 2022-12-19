@@ -4,6 +4,7 @@
 #include "riscv.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h"
 #include "defs.h"
 
 struct cpu cpus[NCPU];
@@ -603,4 +604,27 @@ void procdump(void) {
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+// Get number of processes whose state is not UNUSED.
+uint getnproc() {
+  uint nproc = 0;
+
+  for (struct proc *p = proc; p < &proc[NPROC]; ++p)
+    if (p->state != UNUSED)
+      ++nproc;
+  return nproc;
+}
+
+// Get system info.
+// addr is a user virtual address.
+int getsysinfo(uint64 addr) {
+  struct proc *p = myproc();
+  struct sysinfo sinfo;
+
+  sinfo.nproc = getnproc();
+  sinfo.freemem = getfreemem();
+  if (copyout(p->pagetable, addr, (char *)&sinfo, sizeof(sinfo)) < 0)
+    return -1;
+  return 0;
 }
