@@ -1,0 +1,34 @@
+## Which other xv6 system call(s) could be made faster using this shared page? Explain how. 
+
+fork().
+
+By storing the pointer to the parent process in `usyscall` struct, the child process can access its parent just in userland.
+
+* References
+
+- https://stackoverflow.com/a/19942352/12002560
+- https://blog.packagecloud.io/system-calls-are-much-slower-on-ec2/
+
+## Explain the output of vmprint in terms of Fig 3-4 from the text. What does page 0 contain? What is in page 2? When running in user mode, could the process read/write the memory mapped by page 1? What does the third to last page contain?
+
+* Explaination
+
+Page 0 on the first layer stores 1) data and text of a process, 2) a guard page, 3) a stack containing the information of command-line arguments, which are exactly stored in page 0, 1, 2 of the third layer, respectively.
+
+Page 255 on the first layer stores 1) a shared page related to the current process (`struct usyscall`) for system call optimization, 2) trapframe, 3) trampoline, which are exactly stored in page 509, 510, 511 (the last 3 pages) of the third layer, respectively.
+
+* What does page 0 contain?
+
+Data and text of a process.
+
+* What is in page 2?
+
+A stack containing the information of command-line arguments.
+
+* Page 1 in user mode
+
+No, because this page does not have the `PTE_U` flag.
+
+* What does the third to last page contain?
+
+1) Heap, 2) a shared page related to the current process (`struct usyscall`) for system call optimization, 3) trapframe, 4) trampoline.
