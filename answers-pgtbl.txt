@@ -1,0 +1,10 @@
+## Which other xv6 system call(s) could be made faster using this shared page? Explain how. 
+
+fork().
+
+By storing the pointer to the parent process in `usyscall` struct, the child process can access its parent just in userland.
+
+* References
+
+- https://stackoverflow.com/a/19942352/12002560
+- https://blog.packagecloud.io/system-calls-are-much-slower-on-ec2/
