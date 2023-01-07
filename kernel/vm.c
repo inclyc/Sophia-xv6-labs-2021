@@ -395,3 +395,28 @@ int copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
     return -1;
   }
 }
+
+// Recursively print the page table in a tree view with depth indicators.
+void vmprint_with_depth(pagetable_t pagetable, const char *depths[]) {
+  for (int i = 0; i < 512; ++i) {
+    pte_t pte = pagetable[i];
+    if (pte & PTE_V) {
+      // This PTE is valid.
+      uint64 pa = PTE2PA(pte);
+      printf("%s%d: pte %p pa %p\n", *depths, i, pte, pa);
+      if ((pte & (PTE_R | PTE_W | PTE_X)) == 0) {
+        // This PTE points to a lower-level page table.
+        vmprint_with_depth((pagetable_t)pa, depths + 1);
+      }
+    }
+  }
+}
+
+// Internal depth indicators
+const char *VMPRINT_DEPTHS[] = {" ..", " .. ..", " .. .. .."};
+
+// Trigger of vmprint_with_depth().
+void vmprint(pagetable_t pagetable) {
+  printf("page table %p\n", pagetable);
+  vmprint_with_depth(pagetable, VMPRINT_DEPTHS);
+}
