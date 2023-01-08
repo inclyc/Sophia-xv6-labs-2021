@@ -60,7 +60,25 @@ uint64 sys_sleep(void) {
 
 #ifdef LAB_PGTBL
 int sys_pgaccess(void) {
-  // lab pgtbl: your code here.
+  // The upper limit of the number of scanned pages is 64.
+  uint64 va, ua, buffer = 0;
+  int npage;
+  pagetable_t pagetable = myproc()->pagetable;
+
+  if (argaddr(0, &va) < 0 || argint(1, &npage) < 0 || argaddr(2, &ua) < 0)
+    return -1;
+  if (npage < 0 || npage > 64)
+    return -1;
+  for (int i = 0; i < npage; ++i) {
+    pte_t *pte = walk(pagetable, va + i * PGSIZE, 0);
+    if (*pte & PTE_A) {
+      buffer |= 1UL << i;
+      *pte &= ~PTE_A;
+    }
+  }
+  if (copyout(pagetable, ua, (char *)&buffer, sizeof(uint64)) < 0)
+    return -1;
+
   return 0;
 }
 #endif
